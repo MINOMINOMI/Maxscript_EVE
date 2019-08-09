@@ -1,7 +1,22 @@
+/* WaterMark
+    "Script By Minomi from Shiftup - Project_EVE"
+*/
+
 fn getSelectedNodes =
 (
-    local arNodes = selection as array 
+    local arNodes = for i in selection where classof i == Biped_Object collect i 
     return arNodes 
+)
+
+fn isRootBipDeleteKey bipNode =
+(
+    if bipNode.controller.rootName == bipNode.name do 
+    (
+        ctrlRoot = bipNode.transform.controller
+        vertCtrl = ctrlRoot.vertical.controller
+        horzCtrl = ctrlRoot.horizontal.controller 
+        turnCtrl = ctrlRoot.turning.controller
+    )
 )
 
 fn getFramesforDelete fStartFrame fEndFrame iInterval =
@@ -46,15 +61,45 @@ fn getFramesforDelete fStartFrame fEndFrame iInterval =
     (
         for j in nodes do 
         (
-            local iIndex = getKeyIndex j.controller i 
-
-            if iIndex > 0 do 
+            if (j.controller.rootName == j.name) then  
             (
-                deleteKey j.controller iIndex 
+                local ctrlRoot = j.transform.controller
+                local vertCtrl = ctrlRoot.vertical.controller
+                local horzCtrl = ctrlRoot.horizontal.controller 
+                local turnCtrl = ctrlRoot.turning.controller
+
+                local iIndexV = getKeyIndex vertCtrl i 
+                local iIndexH = getKeyIndex horzCtrl i 
+                local iIndexT = getKeyIndex turnCtrl i 
+
+                if iIndexV > 0 do 
+                (
+                    deleteKey vertCtrl iIndexV
+                )
+                
+                if iIndexH > 0 do 
+                (
+                    deleteKey horzCtrl iIndexH
+                )
+                if iIndexT > 0 do
+                (
+                    deleteKey turnCtrl iIndexT
+                )
+            )
+            else
+            ( 
+                local iIndex = getKeyIndex j.controller i 
+
+                if iIndex > 0 do 
+                (
+                    deleteKey j.controller iIndex 
+                )
             )
         )
     )
 )
+
+
 Try
 (
     DestroyDialog rltKeyReducer
@@ -63,8 +108,8 @@ Catch()
 
 rollout rltKeyReducer "Selected Key Reducer"
 (
-    Spinner sprStartFrame "Start Frame : " across:2 type:#integer range:[-100,50000,0]
-    Spinner sprEndFrame "End Frame : " type:#integer range:[-100,50000,0]
+    Spinner sprStartFrame "Start Frame : " across:2 type:#integer range:[-50000,50000,0]
+    Spinner sprEndFrame "End Frame : " type:#integer range:[-50000,50000,0]
     Spinner sprFrames "Key Reduction Interval" type:#integer
     button btnReduceKeys "Reduce Keys"
 
@@ -79,7 +124,7 @@ rollout rltKeyReducer "Selected Key Reducer"
             getFramesforDelete fStartFrame fEndFrame iInterval
         )
     )
-)createDialog rltKeyReducer 400 100
+)createDialog rltKeyReducer 400 80
 
 
 --maxSCript Remainder = mod {Val1} {Val2}
